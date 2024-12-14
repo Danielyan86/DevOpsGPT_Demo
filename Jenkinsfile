@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'MacLocal'
+    }
     environment {
         PORT = '3001'
         DOCKER_IMAGE = 'todo-app'
