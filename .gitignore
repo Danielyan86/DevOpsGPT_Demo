@@ -26,3 +26,4 @@ pids
 ._*
 .Spotlight-V100
 .Trashes
+package-lock.json
