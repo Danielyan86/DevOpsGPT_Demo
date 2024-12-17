@@ -59,11 +59,14 @@ pipeline {
                     *Build URL*: ${env.BUILD_URL}
                 """
                 
-                slackSend(
-                    channel: SLACK_CHANNEL,
-                    color: buildStatus == 'SUCCESS' ? 'good' : 'danger',
-                    message: message
-                )
+                withCredentials([string(credentialsId: 'SlackToken', variable: 'SLACK_TOKEN')]) {
+                    slackSend(
+                        channel: SLACK_CHANNEL,
+                        token: SLACK_TOKEN,
+                        color: buildStatus == 'SUCCESS' ? 'good' : 'danger',
+                        message: message
+                    )
+                }
             }
         }
         failure {
