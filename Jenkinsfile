@@ -68,7 +68,8 @@ pipeline {
                         channel: SLACK_CHANNEL,
                         color: buildStatus == 'SUCCESS' ? 'good' : 'danger',
                         message: message,
-                        notifyCommitters: true
+                        notifyCommitters: true,
+                        verbose: true
                     )
                     echo "Slack notification sent successfully"
                 } catch (Exception e) {
