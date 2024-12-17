@@ -5,7 +5,7 @@ pipeline {
     environment {
         PORT = '3001'
         DOCKER_IMAGE = 'todo-app'
-        SLACK_CHANNEL = '#jenkins-notifications'
+        SLACK_CHANNEL = '#all-dify-bot-demo'
     }
     stages {
         stage('Build Docker Image') {
