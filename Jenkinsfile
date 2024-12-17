@@ -8,14 +8,14 @@ pipeline {
         SLACK_CHANNEL = '#all-dify-bot-demo'
     }
     stages {
-        // stage('Build Docker Image') {
-        //     steps {
-        //         sh '''
-        //             echo "Building Docker image..."
-        //             docker build -t ${DOCKER_IMAGE}:latest .
-        //         '''
-        //     }
-        // }
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    echo "Building Docker image..."
+                    docker build -t ${DOCKER_IMAGE}:latest .
+                '''
+            }
+        }
         // stage('Deploy') {
         //     steps {
         //         sh '''
