@@ -48,22 +48,32 @@ pipeline {
                 def buildStatus = currentBuild.result ?: 'SUCCESS'
                 def buildDuration = currentBuild.durationString
                 
+                echo "Build completed with status: ${buildStatus}"
+                echo "Build duration: ${buildDuration}"
+                
                 def message = """
                     *Build Status*: ${buildStatus}
                     *Job*: ${env.JOB_NAME}
                     *Build Number*: #${env.BUILD_NUMBER}
                     *Duration*: ${buildDuration}
                     *Build URL*: ${env.BUILD_URL}
+                    *Image Tag*: ${DOCKER_IMAGE}:${BUILD_TIMESTAMP}
+                    *Deployed Port*: ${PORT}
                 """
                 
-                // Use Slack credentials securely
-                withCredentials([string(credentialsId: 'SlackToken', variable: 'SLACK_TOKEN')]) {
+                echo "Sending notification to Slack channel: ${SLACK_CHANNEL}"
+                try {
                     slackSend(
-                        tokenCredentialId: 'SlackToken',  // Reference the Jenkins credential ID
+                        tokenCredentialId: 'SlackToken',
                         channel: SLACK_CHANNEL,
                         color: buildStatus == 'SUCCESS' ? 'good' : 'danger',
-                        message: message
+                        message: message,
+                        notifyCommitters: true
                     )
+                    echo "Slack notification sent successfully"
+                } catch (Exception e) {
+                    echo "Failed to send Slack notification: ${e.message}"
+                    echo "Stack trace: ${e.printStackTrace()}"
                 }
             }
         }
