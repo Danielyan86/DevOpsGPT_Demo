@@ -57,7 +57,7 @@ pipeline {
                     *Build Number*: #${env.BUILD_NUMBER}
                     *Duration*: ${buildDuration}
                     *Build URL*: ${env.BUILD_URL}
-                    *Image Tag*: ${DOCKER_IMAGE}:${BUILD_TIMESTAMP}
+                    *Image Tag*: ${DOCKER_IMAGE}:latest
                     *Deployed Port*: ${PORT}
                 """
                 
