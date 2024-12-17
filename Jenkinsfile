@@ -6,7 +6,7 @@ pipeline {
         PORT = '3001'
         DOCKER_IMAGE = 'todo-app'
         SLACK_CHANNEL = '#jenkins-notifications'
-        SLACK_TOKEN = credentials('SlackToen')
+        SLACK_TOKEN = credentials('SlackToken')
     }
     stages {
         stage('Build Docker Image') {
@@ -59,7 +59,7 @@ pipeline {
                 
                 slackSend(
                     channel: SLACK_CHANNEL,
-                    tokenCredentialId: 'SlackToen',
+                    tokenCredentialId: 'SlackToken',
                     color: buildStatus == 'SUCCESS' ? 'good' : 'danger',
                     message: message
                 )
