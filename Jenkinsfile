@@ -8,51 +8,12 @@ pipeline {
         SLACK_CHANNEL = '#all-dify-bot-demo'
     }
     stages {
-        stage('Initialize') {
-            steps {
-                script {
-                    // Define the Slack message function
-                    env.sendSlackMessage = { message, color = 'good' ->
-                        try {
-                            slackSend(
-                                tokenCredentialId: 'SlackToken',
-                                channel: SLACK_CHANNEL,
-                                color: color,
-                                message: message
-                            )
-                        } catch (Exception e) {
-                            echo "Failed to send Slack notification: ${e.message}"
-                        }
-                    }
-                }
-            }
-        }
-        stage('Notify Start') {
-            steps {
-                script {
-                    env.sendSlackMessage("""
-                        :rocket: *Build Started* :hammer_and_wrench:
-                        *Job*: ${env.JOB_NAME}
-                        *Build Number*: #${env.BUILD_NUMBER}
-                        *Status*: :building_construction: Building...
-                        *Build URL*: ${env.BUILD_URL}
-                    """, 'warning')
-                }
-            }
-        }
         stage('Build Docker Image') {
             steps {
                 sh '''
                     echo "Building Docker image..."
                     docker build -t ${DOCKER_IMAGE}:latest .
                 '''
-                script {
-                    env.sendSlackMessage("""
-                        :whale: *Docker Image Built Successfully* :package:
-                        *Job*: ${env.JOB_NAME}
-                        *Image*: ${DOCKER_IMAGE}:latest
-                    """)
-                }
             }
         }
         stage('Deploy') {
@@ -78,16 +39,6 @@ pipeline {
                         exit 1
                     }
                 '''
-                script {
-                    env.sendSlackMessage("""
-                        :white_check_mark: *Deployment Successful* :tada:
-                        *Job*: ${env.JOB_NAME}
-                        *Build Number*: #${env.BUILD_NUMBER}
-                        *Status*: :green_circle: Running
-                        *Application URL*: http://localhost:${PORT}
-                        *Build URL*: ${env.BUILD_URL}
-                    """)
-                }
             }
         }
     }
@@ -97,21 +48,33 @@ pipeline {
                 def buildStatus = currentBuild.result ?: 'SUCCESS'
                 def buildDuration = currentBuild.durationString
                 
+                echo "Build completed with status: ${buildStatus}"
+                echo "Build duration: ${buildDuration}"
+                
                 def message = """
-                    :clipboard: *Build Summary* :mag:
-                    *Build Status*: ${buildStatus == 'SUCCESS' ? ':large_green_circle:' : ':red_circle:'} ${buildStatus}
+                    *Build Status*: ${buildStatus}
                     *Job*: ${env.JOB_NAME}
                     *Build Number*: #${env.BUILD_NUMBER}
-                    *Duration*: :hourglass_flowing_sand: ${buildDuration}
+                    *Duration*: ${buildDuration}
                     *Build URL*: ${env.BUILD_URL}
-                    *Image Tag*: :whale: ${DOCKER_IMAGE}:latest
-                    *Deployed Port*: :computer: ${PORT}
+                    *Image Tag*: ${DOCKER_IMAGE}:latest
+                    *Deployed Port*: ${PORT}
                 """
                 
-                env.sendSlackMessage(
-                    message, 
-                    buildStatus == 'SUCCESS' ? 'good' : 'danger'
-                )
+                echo "Sending notification to Slack channel: ${SLACK_CHANNEL}"
+                try {
+                    slackSend(
+                        tokenCredentialId: 'SlackToken',
+                        channel: SLACK_CHANNEL,
+                        color: buildStatus == 'SUCCESS' ? 'good' : 'danger',
+                        message: message,
+                        notifyCommitters: true
+                    )
+                    echo "Slack notification sent successfully"
+                } catch (Exception e) {
+                    echo "Failed to send Slack notification: ${e.message}"
+                    echo "Stack trace: ${e.printStackTrace()}"
+                }
             }
         }
         failure {
@@ -120,16 +83,6 @@ pipeline {
                 docker stop ${DOCKER_IMAGE} || true
                 docker rm ${DOCKER_IMAGE} || true
             '''
-            script {
-                env.sendSlackMessage("""
-                    :x: *Deployment Failed* :boom:
-                    *Job*: ${env.JOB_NAME}
-                    *Build Number*: #${env.BUILD_NUMBER}
-                    *Status*: :red_circle: Failed
-                    *Build URL*: ${env.BUILD_URL}
-                    :sos: Check logs for details
-                """, 'danger')
-            }
         }
         success {
             echo "Application successfully deployed in Docker on port ${PORT}"
