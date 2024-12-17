@@ -5,6 +5,8 @@ pipeline {
     environment {
         PORT = '3001'
         DOCKER_IMAGE = 'todo-app'
+        SLACK_CHANNEL = '#jenkins-notifications'
+        SLACK_TOKEN = credentials('SlackToen')
     }
     stages {
         stage('Build Docker Image') {
@@ -42,6 +44,27 @@ pipeline {
         }
     }
     post {
+        always {
+            script {
+                def buildStatus = currentBuild.result ?: 'SUCCESS'
+                def buildDuration = currentBuild.durationString
+                
+                def message = """
+                    *Build Status*: ${buildStatus}
+                    *Job*: ${env.JOB_NAME}
+                    *Build Number*: #${env.BUILD_NUMBER}
+                    *Duration*: ${buildDuration}
+                    *Build URL*: ${env.BUILD_URL}
+                """
+                
+                slackSend(
+                    channel: SLACK_CHANNEL,
+                    tokenCredentialId: 'SlackToen',
+                    color: buildStatus == 'SUCCESS' ? 'good' : 'danger',
+                    message: message
+                )
+            }
+        }
         failure {
             sh '''
                 echo "Deployment failed, cleaning up..."
