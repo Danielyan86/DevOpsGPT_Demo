@@ -7,6 +7,8 @@ pipeline {
         DOCKER_IMAGE = 'todo-app'
         SLACK_CHANNEL = '#jenkins-notifications'
         SLACK_TOKEN = credentials('SlackToken')
+        SLACK_TEAM_DOMAIN = 'difybotdemo'
+        SLACK_BASE_URL = 'https://hooks.slack.com/services/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'
     }
     stages {
         stage('Build Docker Image') {
@@ -59,7 +61,6 @@ pipeline {
                 
                 slackSend(
                     channel: SLACK_CHANNEL,
-                    tokenCredentialId: 'SlackToken',
                     color: buildStatus == 'SUCCESS' ? 'good' : 'danger',
                     message: message
                 )
