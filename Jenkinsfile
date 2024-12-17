@@ -7,18 +7,6 @@ pipeline {
         DOCKER_IMAGE = 'todo-app'
         SLACK_CHANNEL = '#all-dify-bot-demo'
     }
-    def sendSlackMessage(String message, String color = 'good') {
-        try {
-            slackSend(
-                tokenCredentialId: 'SlackToken',
-                channel: SLACK_CHANNEL,
-                color: color,
-                message: message
-            )
-        } catch (Exception e) {
-            echo "Failed to send Slack notification: ${e.message}"
-        }
-    }
     stages {
         stage('Initialize') {
             steps {
