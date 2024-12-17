@@ -6,9 +6,6 @@ pipeline {
         PORT = '3001'
         DOCKER_IMAGE = 'todo-app'
         SLACK_CHANNEL = '#jenkins-notifications'
-        SLACK_TOKEN = credentials('SlackToken')
-        SLACK_TEAM_DOMAIN = 'difybotdemo'
-        SLACK_BASE_URL = 'https://hooks.slack.com/services/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'
     }
     stages {
         stage('Build Docker Image') {
@@ -59,10 +56,11 @@ pipeline {
                     *Build URL*: ${env.BUILD_URL}
                 """
                 
+                // Use Slack credentials securely
                 withCredentials([string(credentialsId: 'SlackToken', variable: 'SLACK_TOKEN')]) {
                     slackSend(
+                        tokenCredentialId: 'SlackToken',  // Reference the Jenkins credential ID
                         channel: SLACK_CHANNEL,
-                        token: SLACK_TOKEN,
                         color: buildStatus == 'SUCCESS' ? 'good' : 'danger',
                         message: message
                     )
@@ -80,4 +78,4 @@ pipeline {
             echo "Application successfully deployed in Docker on port ${PORT}"
         }
     }
-} 
+}
