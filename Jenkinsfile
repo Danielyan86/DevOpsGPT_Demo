@@ -73,6 +73,35 @@ pipeline {
         }
         stage('Deploy') {
             steps {
+                script {
+                    // Send deployment start notification
+                    try {
+                        def deployStartMessage = """
+                            :rocket: *Deployment Started* :gear:
+                            *Job*: ${env.JOB_NAME}
+                            *Build Number*: #${env.BUILD_NUMBER}
+                            *Branch*: :git: ${params.branch}
+                            *Environment*: :gear: ${params.environment}
+                            *Image*: :whale: ${DOCKER_IMAGE}:latest
+                            *Target Port*: :computer: ${PORT}
+                            
+                            :arrow_forward: Starting deployment process...
+                            • Container will be recreated
+                            • Application will be available at port ${PORT}
+                            • <${env.BUILD_URL}console|View Deployment Progress>
+                        """
+                        
+                        slackSend(
+                            tokenCredentialId: 'SlackToken',
+                            channel: params.SLACK_CHANNEL,
+                            color: 'warning',
+                            message: deployStartMessage
+                        )
+                    } catch (Exception e) {
+                        echo "Failed to send deployment start notification to Slack: ${e.message}"
+                    }
+                }
+                
                 sh '''
                     echo "Stopping existing container if any..."
                     docker stop ${DOCKER_IMAGE} || true
@@ -117,6 +146,7 @@ pipeline {
                     *Build URL*: :link: ${env.BUILD_URL}
                     *Image Tag*: :whale: ${DOCKER_IMAGE}:${params.environment}
                     *Deployed Port*: :computer: ${PORT}
+                    *App URL*: :link: <http://your-server:${PORT}|Open Application>
 
                     ${buildStatus == 'SUCCESS' 
                         ? ':rocket: Application deployed successfully!' 
