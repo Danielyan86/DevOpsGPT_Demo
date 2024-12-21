@@ -25,24 +25,24 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Building for environment: ${params.environment}"
-                sh '''
+                sh """
                     echo "Building Docker image..."
                     docker build -t ${DOCKER_IMAGE}:${params.environment} .
                     docker tag ${DOCKER_IMAGE}:${params.environment} ${DOCKER_IMAGE}:latest
-                '''
+                """
             }
         }
         stage('Deploy') {
             steps {
-                sh '''
+                sh """
                     echo "Stopping existing container if any..."
                     docker stop ${DOCKER_IMAGE} || true
                     docker rm ${DOCKER_IMAGE} || true
                     
                     echo "Starting new container..."
-                    docker run -d \
-                        --name ${DOCKER_IMAGE} \
-                        -p ${PORT}:3001 \
+                    docker run -d \\
+                        --name ${DOCKER_IMAGE} \\
+                        -p ${PORT}:3001 \\
                         ${DOCKER_IMAGE}:latest
                     
                     echo "Waiting for server to start..."
@@ -54,7 +54,7 @@ pipeline {
                         docker logs ${DOCKER_IMAGE}
                         exit 1
                     }
-                '''
+                """
             }
         }
     }
