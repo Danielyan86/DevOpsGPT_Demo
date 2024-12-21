@@ -97,6 +97,11 @@ pipeline {
                     ${buildStatus == 'SUCCESS' 
                         ? ':rocket: Application deployed successfully!' 
                         : ':boom: Build failed - Check logs for details'}
+                   
+                    :memo: *View Details*
+                    • <${env.BUILD_URL}console|View Build Logs>
+                    • <${env.BUILD_URL}|View Build Page>
+                    • <${env.JOB_URL}|View Project>
                 """
                 
                 echo "Sending notification to Slack channel: ${SLACK_CHANNEL}"
