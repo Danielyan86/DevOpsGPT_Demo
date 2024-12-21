@@ -83,15 +83,20 @@ pipeline {
                 echo "Build duration: ${buildDuration}"
                 
                 def message = """
-                    *Build Status*: ${buildStatus}
+                    :clipboard: *Build Summary* :mag:
+                    *Build Status*: ${buildStatus == 'SUCCESS' ? ':white_check_mark:' : ':x:'} ${buildStatus}
                     *Job*: ${env.JOB_NAME}
                     *Build Number*: #${env.BUILD_NUMBER}
-                    *Branch*: ${params.branch}
-                    *Environment*: ${params.environment}
-                    *Duration*: ${buildDuration}
-                    *Build URL*: ${env.BUILD_URL}
-                    *Image Tag*: ${DOCKER_IMAGE}:${params.environment}
-                    *Deployed Port*: ${PORT}
+                    *Branch*: :git: ${params.branch}
+                    *Environment*: :gear: ${params.environment}
+                    *Duration*: :hourglass_flowing_sand: ${buildDuration}
+                    *Build URL*: :link: ${env.BUILD_URL}
+                    *Image Tag*: :whale: ${DOCKER_IMAGE}:${params.environment}
+                    *Deployed Port*: :computer: ${PORT}
+
+                    ${buildStatus == 'SUCCESS' 
+                        ? ':rocket: Application deployed successfully!' 
+                        : ':boom: Build failed - Check logs for details'}
                 """
                 
                 echo "Sending notification to Slack channel: ${SLACK_CHANNEL}"
