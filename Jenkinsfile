@@ -97,18 +97,18 @@ pipeline {
                     ${buildStatus == 'SUCCESS' 
                         ? ':rocket: Application deployed successfully!' 
                         : ':boom: Build failed - Check logs for details'}
-                   
+                    
                     :memo: *View Details*
                     • <${env.BUILD_URL}console|View Build Logs>
                     • <${env.BUILD_URL}|View Build Page>
                     • <${env.JOB_URL}|View Project>
                 """
                 
-                echo "Sending notification to Slack channel: ${SLACK_CHANNEL}"
+                echo "Sending notification to Slack channel: ${params.SLACK_CHANNEL}"
                 try {
                     slackSend(
                         tokenCredentialId: 'SlackToken',
-                        channel: SLACK_CHANNEL,
+                        channel: params.SLACK_CHANNEL,
                         color: buildStatus == 'SUCCESS' ? 'good' : 'danger',
                         message: message,
                         notifyCommitters: true
