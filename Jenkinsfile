@@ -25,29 +25,16 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Building for environment: ${params.environment}"
-                echo "Docker image name: ${DOCKER_IMAGE}"
-                echo "Environment: ${params.environment}"
-                
-                sh 'printenv | sort'
-                
-                sh """
-                   echo "Debug: DOCKER_IMAGE=\${DOCKER_IMAGE}"
-                   echo "Debug: params.environment=${params.environment}"
-                   
-                    echo "Building Docker image..."
-                   echo "Command: docker build -t ${DOCKER_IMAGE}:${params.environment} ."
-                   
-                    docker build -t ${DOCKER_IMAGE}:${params.environment} .
-                   
-                   echo "Docker images after build:"
-                   docker images | grep ${DOCKER_IMAGE} || true
-                   
-                   echo "Tagging image as latest..."
-                    docker tag ${DOCKER_IMAGE}:${params.environment} ${DOCKER_IMAGE}:latest
-                   
-                   echo "Final Docker images:"
-                   docker images | grep ${DOCKER_IMAGE} || true
-                """
+                withEnv(["ENV_TAG=${params.environment}"]) {
+                    sh """
+                        echo "Building Docker image..."
+                        docker build -t ${DOCKER_IMAGE}:\${ENV_TAG} .
+                        docker tag ${DOCKER_IMAGE}:\${ENV_TAG} ${DOCKER_IMAGE}:latest
+                        
+                        echo "Docker images after build:"
+                        docker images | grep ${DOCKER_IMAGE} || true
+                    """
+                }
             }
         }
         stage('Deploy') {
