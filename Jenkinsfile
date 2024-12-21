@@ -29,10 +29,10 @@ pipeline {
                     sh '''
                         echo "Building Docker image..."
                         docker build -t $DOCKER_IMAGE:$ENV_TAG .
-                        
+
                         echo "Tagging image as latest..."
                         docker tag $DOCKER_IMAGE:$ENV_TAG $DOCKER_IMAGE:latest
-                        
+
                         echo "Listing Docker images..."
                         docker images | grep $DOCKER_IMAGE || true
                     '''
@@ -41,6 +41,7 @@ pipeline {
                 sh 'docker images | grep todo-app || true'
             }
         }
+
 
         stage('Deploy') {
             steps {
