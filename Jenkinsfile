@@ -10,6 +10,18 @@ pipeline {
     environment {
         PORT = '3001'
         DOCKER_IMAGE = 'todo-app'
+        TOTAL_STAGES = '3'
+    }
+    def generateProgressBar(currentStage) {
+        script {
+            def percentage = (currentStage / TOTAL_STAGES.toInteger()) * 100
+            def progressBar = ""
+            def barLength = 20
+            def filledLength = (percentage / 100 * barLength).toInteger()
+            
+            progressBar = "[${"▓" * filledLength}${"░" * (barLength - filledLength)}] ${percentage.intValue()}%"
+            return progressBar
+        }
     }
     stages {
         stage('Checkout') {
@@ -20,6 +32,19 @@ pipeline {
                     branches: [[name: "*/${params.branch}"]],
                     userRemoteConfigs: [[url: 'https://github.com/Danielyan86/DevOpsGPT_Demo.git']]
                 ])
+                script {
+                    def progressBar = generateProgressBar(1)
+                    slackSend(
+                        tokenCredentialId: 'SlackToken',
+                        channel: params.SLACK_CHANNEL,
+                        color: 'good',
+                        message: """
+                            :white_check_mark: *Checkout Complete*
+                            ${progressBar}
+                            *Stage*: 1/${TOTAL_STAGES} - Source code checkout completed
+                        """
+                    )
+                }
             }
         }
         stage('Build Docker Image') {
@@ -68,6 +93,17 @@ pipeline {
                     
                     // List images
                     sh "docker images | grep ${dockerImage} || true"
+                    def progressBar = generateProgressBar(2)
+                    slackSend(
+                        tokenCredentialId: 'SlackToken',
+                        channel: params.SLACK_CHANNEL,
+                        color: 'good',
+                        message: """
+                            :white_check_mark: *Docker Build Complete*
+                            ${progressBar}
+                            *Stage*: 2/${TOTAL_STAGES} - Docker image built successfully
+                        """
+                    )
                 }
             }
         }
@@ -123,6 +159,17 @@ pipeline {
                         exit 1
                     }
                 '''
+                def progressBar = generateProgressBar(3)
+                slackSend(
+                    tokenCredentialId: 'SlackToken',
+                    channel: params.SLACK_CHANNEL,
+                    color: 'good',
+                    message: """
+                        :white_check_mark: *Deployment Complete*
+                        ${progressBar}
+                        *Stage*: 3/${TOTAL_STAGES} - Application deployed successfully
+                    """
+                )
             }
         }
     }
