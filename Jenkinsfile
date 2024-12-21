@@ -28,6 +28,30 @@ pipeline {
                     def dockerImage = "${DOCKER_IMAGE}"
                     def envTag = "${params.environment}"
                     
+                    // Send start notification to Slack
+                    try {
+                        def startMessage = """
+                            :construction: *Build Started* :gear:
+                            *Job*: ${env.JOB_NAME}
+                            *Build Number*: #${env.BUILD_NUMBER}
+                            *Branch*: :git: ${params.branch}
+                            *Environment*: :gear: ${params.environment}
+                            *Image*: :whale: ${dockerImage}:${envTag}
+                            
+                            :arrow_forward: Starting Docker build...
+                            • <${env.BUILD_URL}|View Build Progress>
+                        """
+                        
+                        slackSend(
+                            tokenCredentialId: 'SlackToken',
+                            channel: params.SLACK_CHANNEL,
+                            color: 'warning',
+                            message: startMessage
+                        )
+                    } catch (Exception e) {
+                        echo "Failed to send start notification to Slack: ${e.message}"
+                    }
+                    
                     // Print variables for debugging
                     echo "Debug info:"
                     echo "dockerImage = ${dockerImage}"
