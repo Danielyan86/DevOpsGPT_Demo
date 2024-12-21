@@ -25,16 +25,31 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Building for environment: ${params.environment}"
+                echo "Debug - DOCKER_IMAGE: ${DOCKER_IMAGE}"
+                echo "Debug - ENV_TAG: ${params.environment}"
+                
                 withEnv(["ENV_TAG=${params.environment}"]) {
+                    sh 'echo "Inside withEnv - ENV_TAG=$ENV_TAG"'
+                    sh 'echo "Inside withEnv - DOCKER_IMAGE=$DOCKER_IMAGE"'
+                    
                     sh """
+                        echo "Will execute: docker build -t \${DOCKER_IMAGE}:\${ENV_TAG} ."
+                        
                         echo "Building Docker image..."
                         docker build -t ${DOCKER_IMAGE}:\${ENV_TAG} .
+                        
+                        echo "Build completed, checking image..."
+                        docker images | grep \${DOCKER_IMAGE} || true
+                        
+                        echo "Tagging command to execute: docker tag \${DOCKER_IMAGE}:\${ENV_TAG} \${DOCKER_IMAGE}:latest"
                         docker tag ${DOCKER_IMAGE}:\${ENV_TAG} ${DOCKER_IMAGE}:latest
                         
                         echo "Docker images after build:"
                         docker images | grep ${DOCKER_IMAGE} || true
                     """
                 }
+                echo "Build stage completed - Final verification"
+                sh 'docker images | grep todo-app || true'
             }
         }
         stage('Deploy') {
