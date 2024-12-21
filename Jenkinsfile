@@ -24,12 +24,27 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                echo "Building for environment: ${params.environment}"
-                sh '''
-                    echo "Building Docker image..."
-                    docker build -t ${DOCKER_IMAGE}:${params.environment} .
-                    docker tag ${DOCKER_IMAGE}:${params.environment} ${DOCKER_IMAGE}:latest
-                '''
+                script {
+                    def dockerImage = "${DOCKER_IMAGE}"
+                    def envTag = "${params.environment}"
+                    
+                    // Print variables for debugging
+                    echo "Debug info:"
+                    echo "dockerImage = ${dockerImage}"
+                    echo "envTag = ${envTag}"
+                    echo "Full image name will be: ${dockerImage}:${envTag}"
+                    
+                    // Build the image
+                    echo "Executing build command: docker build -t ${dockerImage}:${envTag} ."
+                    sh "docker build -t ${dockerImage}:${envTag} ."
+                    
+                    // Tag as latest
+                    echo "Executing tag command: docker tag ${dockerImage}:${envTag} ${dockerImage}:latest"
+                    sh "docker tag ${dockerImage}:${envTag} ${dockerImage}:latest"
+                    
+                    // List images
+                    sh "docker images | grep ${dockerImage} || true"
+                }
             }
         }
         stage('Deploy') {
