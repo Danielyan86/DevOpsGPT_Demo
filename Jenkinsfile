@@ -28,10 +28,18 @@ pipeline {
                     def dockerImage = "${DOCKER_IMAGE}"
                     def envTag = "${params.environment}"
                     
+                    // Print variables for debugging
+                    echo "Debug info:"
+                    echo "dockerImage = ${dockerImage}"
+                    echo "envTag = ${envTag}"
+                    echo "Full image name will be: ${dockerImage}:${envTag}"
+                    
                     // Build the image
+                    echo "Executing build command: docker build -t ${dockerImage}:${envTag} ."
                     sh "docker build -t ${dockerImage}:${envTag} ."
                     
                     // Tag as latest
+                    echo "Executing tag command: docker tag ${dockerImage}:${envTag} ${dockerImage}:latest"
                     sh "docker tag ${dockerImage}:${envTag} ${dockerImage}:latest"
                     
                     // List images
