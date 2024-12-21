@@ -2,17 +2,33 @@ pipeline {
     agent {
         label 'MacLocal'
     }
+    parameters {
+        string(name: 'branch', defaultValue: 'main', description: 'Git branch to build')
+        string(name: 'environment', defaultValue: 'dev', description: 'Environment to deploy')
+    }
     environment {
         PORT = '3001'
         DOCKER_IMAGE = 'todo-app'
         SLACK_CHANNEL = '#all-dify-bot-demo'
     }
     stages {
+        stage('Checkout') {
+            steps {
+                echo "Checking out branch: ${params.branch}"
+                checkout([
+                    $class: 'GitSCM', 
+                    branches: [[name: "*/${params.branch}"]],
+                    userRemoteConfigs: [[url: 'https://github.com/Danielyan86/DevOpsGPT_Demo.git']]
+                ])
+            }
+        }
         stage('Build Docker Image') {
             steps {
+                echo "Building for environment: ${params.environment}"
                 sh '''
                     echo "Building Docker image..."
-                    docker build -t ${DOCKER_IMAGE}:latest .
+                    docker build -t ${DOCKER_IMAGE}:${params.environment} .
+                    docker tag ${DOCKER_IMAGE}:${params.environment} ${DOCKER_IMAGE}:latest
                 '''
             }
         }
@@ -55,9 +71,11 @@ pipeline {
                     *Build Status*: ${buildStatus}
                     *Job*: ${env.JOB_NAME}
                     *Build Number*: #${env.BUILD_NUMBER}
+                    *Branch*: ${params.branch}
+                    *Environment*: ${params.environment}
                     *Duration*: ${buildDuration}
                     *Build URL*: ${env.BUILD_URL}
-                    *Image Tag*: ${DOCKER_IMAGE}:latest
+                    *Image Tag*: ${DOCKER_IMAGE}:${params.environment}
                     *Deployed Port*: ${PORT}
                 """
                 
