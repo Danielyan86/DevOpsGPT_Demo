@@ -164,17 +164,19 @@ pipeline {
                         exit 1
                     }
                 '''
-                def progressBar = env.generateProgressBar(3)
-                slackSend(
-                    tokenCredentialId: 'SlackToken',
-                    channel: params.SLACK_CHANNEL,
-                    color: 'good',
-                    message: """
-                        :white_check_mark: *Deployment Complete*
-                        ${progressBar}
-                        *Stage*: 3/${TOTAL_STAGES} - Application deployed successfully
-                    """
-                )
+                script {
+                    def progressBar = env.generateProgressBar(3)
+                    slackSend(
+                        tokenCredentialId: 'SlackToken',
+                        channel: params.SLACK_CHANNEL,
+                        color: 'good',
+                        message: """
+                            :white_check_mark: *Deployment Complete*
+                            ${progressBar}
+                            *Stage*: 3/${TOTAL_STAGES} - Application deployed successfully
+                        """
+                    )
+                }
             }
         }
     }
