@@ -12,21 +12,11 @@ pipeline {
         DOCKER_IMAGE = 'todo-app'
         TOTAL_STAGES = '3'
     }
-    def generateProgressBar(currentStage) {
-        script {
-            def percentage = (currentStage / TOTAL_STAGES.toInteger()) * 100
-            def progressBar = ""
-            def barLength = 20
-            def filledLength = (percentage / 100 * barLength).toInteger()
-            
-            progressBar = "[${"▓" * filledLength}${"░" * (barLength - filledLength)}] ${percentage.intValue()}%"
-            return progressBar
-        }
-    }
     stages {
         stage('Initialize') {
             steps {
                 script {
+                    // Define the progress bar function
                     env.generateProgressBar = { currentStage ->
                         def percentage = (currentStage.toInteger() / env.TOTAL_STAGES.toInteger()) * 100
                         def progressBar = ""
