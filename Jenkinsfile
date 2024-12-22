@@ -24,6 +24,21 @@ pipeline {
         }
     }
     stages {
+        stage('Initialize') {
+            steps {
+                script {
+                    env.generateProgressBar = { currentStage ->
+                        def percentage = (currentStage.toInteger() / env.TOTAL_STAGES.toInteger()) * 100
+                        def progressBar = ""
+                        def barLength = 20
+                        def filledLength = (percentage / 100 * barLength).toInteger()
+                        
+                        progressBar = "[${"▓" * filledLength}${"░" * (barLength - filledLength)}] ${percentage.intValue()}%"
+                        return progressBar
+                    }
+                }
+            }
+        }
         stage('Checkout') {
             steps {
                 echo "Checking out branch: ${params.branch}"
@@ -33,7 +48,7 @@ pipeline {
                     userRemoteConfigs: [[url: 'https://github.com/Danielyan86/DevOpsGPT_Demo.git']]
                 ])
                 script {
-                    def progressBar = generateProgressBar(1)
+                    def progressBar = env.generateProgressBar(1)
                     slackSend(
                         tokenCredentialId: 'SlackToken',
                         channel: params.SLACK_CHANNEL,
@@ -93,7 +108,7 @@ pipeline {
                     
                     // List images
                     sh "docker images | grep ${dockerImage} || true"
-                    def progressBar = generateProgressBar(2)
+                    def progressBar = env.generateProgressBar(2)
                     slackSend(
                         tokenCredentialId: 'SlackToken',
                         channel: params.SLACK_CHANNEL,
@@ -159,7 +174,7 @@ pipeline {
                         exit 1
                     }
                 '''
-                def progressBar = generateProgressBar(3)
+                def progressBar = env.generateProgressBar(3)
                 slackSend(
                     tokenCredentialId: 'SlackToken',
                     channel: params.SLACK_CHANNEL,
