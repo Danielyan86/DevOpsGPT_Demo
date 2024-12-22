@@ -146,7 +146,7 @@ pipeline {
                     *Build URL*: :link: ${env.BUILD_URL}
                     *Image Tag*: :whale: ${DOCKER_IMAGE}:${params.environment}
                     *Deployed Port*: :computer: ${PORT}
-                    *App URL*: :link: <http://your-server:${PORT}|Open Application>
+                    *App URL*: :link: <http://127.0.0.1:${PORT}|Open Application>
 
                     ${buildStatus == 'SUCCESS' 
                         ? ':rocket: Application deployed successfully!' 
