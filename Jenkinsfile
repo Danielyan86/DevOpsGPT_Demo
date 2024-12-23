@@ -43,7 +43,7 @@ pipeline {
                         """
                         
                         slackSend(
-                            tokenCredentialId: 'SlackToken',
+                            tokenCredentialId: 'SlackDeployBot',
                             channel: params.SLACK_CHANNEL,
                             color: 'warning',
                             message: startMessage
@@ -92,7 +92,7 @@ pipeline {
                         """
                         
                         slackSend(
-                            tokenCredentialId: 'SlackToken',
+                            tokenCredentialId: 'SlackDeployBot',
                             channel: params.SLACK_CHANNEL,
                             color: 'warning',
                             message: deployStartMessage
@@ -162,9 +162,9 @@ pipeline {
                 try {
                     echo "Debug: Attempting to send Slack notification"
                     echo "Debug: Channel = ${params.SLACK_CHANNEL}"
-                    echo "Debug: Token ID = SlackToken"
+                    echo "Debug: Token ID = SlackDeployBot"
                     slackSend(
-                        tokenCredentialId: 'SlackToken',
+                        tokenCredentialId: 'SlackDeployBot',
                         channel: params.SLACK_CHANNEL,
                         color: buildStatus == 'SUCCESS' ? 'good' : 'danger',
                         message: message,
