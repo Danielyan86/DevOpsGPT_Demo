@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'MacLocal'
+        label 'MacAgentLocal'
     }
     parameters {
         string(name: 'branch', defaultValue: 'main', description: 'Git branch to build')
