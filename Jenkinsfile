@@ -160,6 +160,9 @@ pipeline {
                 
                 echo "Sending notification to Slack channel: ${params.SLACK_CHANNEL}"
                 try {
+                    echo "Debug: Attempting to send Slack notification"
+                    echo "Debug: Channel = ${params.SLACK_CHANNEL}"
+                    echo "Debug: Token ID = SlackToken"
                     slackSend(
                         tokenCredentialId: 'SlackToken',
                         channel: params.SLACK_CHANNEL,
@@ -170,7 +173,8 @@ pipeline {
                     echo "Slack notification sent successfully"
                 } catch (Exception e) {
                     echo "Failed to send Slack notification: ${e.message}"
-                    echo "Stack trace: ${e.printStackTrace()}"
+                    echo "Debug: Full error details:"
+                    e.printStackTrace()
                 }
             }
         }
