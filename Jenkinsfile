@@ -107,9 +107,16 @@ pipeline {
                     docker stop ${DOCKER_IMAGE} || true
                     docker rm ${DOCKER_IMAGE} || true
                     
+                    echo "Checking if monitoring network exists..."
+                    if ! docker network ls | grep -q monitoring; then
+                        echo "Creating monitoring network..."
+                        docker network create monitoring
+                    fi
+                    
                     echo "Starting new container..."
                     docker run -d \
                         --name ${DOCKER_IMAGE} \
+                        --network monitoring \
                         -p ${PORT}:3001 \
                         ${DOCKER_IMAGE}:latest
                     
